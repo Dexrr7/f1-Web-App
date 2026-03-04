@@ -152,8 +152,8 @@ with tab1:
 
         df = pd.DataFrame(table_data).sort_values(by="W.Avg").reset_index(drop=True)
         # Dynamic height so every driver row fits without scrolling
-        table_height = (len(df) * 40) + 50
-        st.dataframe(df, use_container_width=True, hide_index=True, height=table_height)
+        styled_df = df.style.set_properties(subset=['SURPRISE', 'FLOP'], **{'font-weight': 'bold'})
+        st.dataframe(styled_df, use_container_width=True, hide_index=True, height=(len(df) * 40) + 50)
         st.caption("* Asterisks indicate historical 2024/F2 data used for backfilling.")
 
 with tab2:
