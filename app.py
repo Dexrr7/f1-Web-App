@@ -76,6 +76,11 @@ def fetch_races_for_year(year):
 # --- APP LAYOUT ---
 st.title("🏎️ F1 Driver Dashboard")
 
+if st.button('🔄 Refresh Live Data'):
+    st.cache_data.clear()
+    st.rerun()
+
+
 # Fetch Data
 with st.spinner("Fetching latest Jolpica F1 data..."):
     races_2026 = fetch_races_for_year(2026)
