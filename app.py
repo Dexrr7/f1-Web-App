@@ -14,6 +14,31 @@ MANUAL_BACKFILL = {
     'BOT': [21, 11, 18]  
 }
 
+TEAM_COLORS = {
+    # Red Bull (Dark Blue)
+    "Max Verstappen": "#3671C6", "Arvid Lindblad": "#3671C6", 
+    # McLaren (Papaya Orange)
+    "Lando Norris": "#FF8000", "Oscar Piastri": "#FF8000",    
+    # Ferrari (Red)
+    "Charles Leclerc": "#E80020", "Lewis Hamilton": "#E80020",
+    # Mercedes (Teal/Silver)
+    "George Russell": "#27F4D2", "Andrea Kimi Antonelli": "#27F4D2", 
+    # Aston Martin (Racing Green)
+    "Fernando Alonso": "#229971", "Lance Stroll": "#229971",  
+    # Alpine (Pink)
+    "Pierre Gasly": "#FF87BC", "Jack Doohan": "#FF87BC", "Franco Colapinto": "#FF87BC", 
+    # Williams (Light Blue)
+    "Alexander Albon": "#64C4FF", "Carlos Sainz": "#64C4FF",  
+    # VCARB (Blue/White)
+    "Yuki Tsunoda": "#6692FF", "Liam Lawson": "#6692FF", "Isack Hadjar": "#6692FF", 
+    # Haas (White/Grey)
+    "Esteban Ocon": "#B6BABD", "Oliver Bearman": "#B6BABD",   
+    # Sauber (Neon Green)
+    "Nico Hülkenberg": "#00E701", "Gabriel Bortoleto": "#00E701", 
+    # Cadillac (Gold)
+    "Sergio Pérez": "#D4AF37", "Valtteri Bottas": "#D4AF37"   
+}
+
 # Map for drivers who might not be natively in the API results yet
 driver_names_map = {
     'LIN': 'Arvid Lindblad',
@@ -156,7 +181,7 @@ with tab2:
         
         df_graph = pd.DataFrame(graph_data)
         
-        fig = px.line(df_graph, x="Race", y="Position", color="Driver", markers=True, template="plotly_dark")
+        fig = px.line(df_graph, x="Race", y="Position", color="Driver", markers=True, template="plotly_dark", color_discrete_map=TEAM_COLORS)
         fig.update_yaxes(autorange="reversed", tickmode='linear', tick0=1, dtick=1) 
         fig.update_layout(height=850, legend_title="Drivers")
         
