@@ -159,6 +159,6 @@ with tab2:
         
         fig = px.line(df_graph, x="Race", y="Position", color="Driver", markers=True, template="plotly_dark")
         fig.update_yaxes(autorange="reversed", tickmode='linear', tick0=1, dtick=1) 
-        fig.update_layout(height=1200, legend_title="Drivers")  # Bumped to match the taller table
+        fig.update_layout(height=850, legend_title="Drivers")
         
         st.plotly_chart(fig, use_container_width=True)
