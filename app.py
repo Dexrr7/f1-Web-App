@@ -14,6 +14,8 @@ MANUAL_BACKFILL = {
     'BOT': [21, 11, 18]  
 }
 
+EXCLUDED_DRIVERS = ['TSU', 'MAG', 'ZHO']
+
 TEAM_COLORS = {
     # Red Bull (Dark Blue)
     "Max Verstappen": "#3671C6", "Arvid Lindblad": "#3671C6", 
@@ -95,6 +97,7 @@ with tab1:
         for idx, race in enumerate(all_recent_races):
             weight = base_weights[idx]
             for result in race['Results']:
+                if result['Driver']['code'] in EXCLUDED_DRIVERS: continue
                 code = result['Driver']['code']
                 
                 # Dynamically map the full names from the API
@@ -179,6 +182,7 @@ with tab2:
         for race in chart_races:
             race_name = race['raceName'].replace(" Grand Prix", "")
             for result in race['Results']:
+                if result['Driver']['code'] in EXCLUDED_DRIVERS: continue
                 code = result['Driver']['code']
                 
                 # Use full names for the graph legend too
