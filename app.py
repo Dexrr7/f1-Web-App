@@ -41,7 +41,6 @@ def fetch_races_for_year(year):
                     completed_races.append(race_data)
             except: pass
             
-            if len(completed_races) >= 3: break
             current_round -= 1
         completed_races.reverse() 
         return completed_races 
