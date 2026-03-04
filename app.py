@@ -14,10 +14,17 @@ MANUAL_BACKFILL = {
     'BOT': [21, 11, 18]  
 }
 
+# Map for drivers who might not be natively in the API results yet
+driver_names_map = {
+    'LIN': 'Arvid Lindblad',
+    'PER': 'Sergio Pérez', 
+    'BOT': 'Valtteri Bottas'
+}
+
 def round_half_up(n):
     return int(n + 0.5)
 
-@st.cache_data(ttl=3600) # Caches data for 1 hour so the site loads instantly
+@st.cache_data(ttl=3600)
 def fetch_races_for_year(year):
     try:
         resp = requests.get(f"{BASE_URL}/{year}.json", timeout=5).json()
@@ -33,8 +40,10 @@ def fetch_races_for_year(year):
                     race_data = r_resp['MRData']['RaceTable']['Races'][0]
                     completed_races.append(race_data)
             except: pass
+            
+            if len(completed_races) >= 3: break
             current_round -= 1
-        completed_races.reverse() # Sort Oldest -> Newest
+        completed_races.reverse() 
         return completed_races 
     except: return []
 
@@ -45,7 +54,7 @@ st.title("🏎️ F1 Driver Dashboard")
 with st.spinner("Fetching latest Jolpica F1 data..."):
     races_2026 = fetch_races_for_year(2026)
     races_2025 = fetch_races_for_year(2025) if len(races_2026) < 3 else []
-    all_recent_races = (races_2025 + races_2026)[-3:] # Get last 3
+    all_recent_races = (races_2025 + races_2026)[-3:]
 
 tab1, tab2 = st.tabs(["🎯 Flop & Surprise Targets", "📈 Driver Progression Graph"])
 
@@ -63,6 +72,12 @@ with tab1:
             weight = base_weights[idx]
             for result in race['Results']:
                 code = result['Driver']['code']
+                
+                # Dynamically map the full names from the API
+                given = result['Driver']['givenName']
+                family = result['Driver']['familyName']
+                driver_names_map[code] = f"{given} {family}"
+                
                 pos = int(result['positionText']) if result['positionText'].isnumeric() else DNF_VALUE
                 if code not in driver_stats: driver_stats[code] = []
                 driver_stats[code].append({'pos': pos, 'weight': weight})
@@ -70,12 +85,12 @@ with tab1:
         table_data = []
         all_drivers = set(driver_stats.keys()) | set(MANUAL_BACKFILL.keys())
         
-        for driver in all_drivers:
-            real_results = driver_stats.get(driver, [])
+        for driver_code in all_drivers:
+            real_results = driver_stats.get(driver_code, [])
             results_needed = 3 - len(real_results)
             
-            if results_needed > 0 and driver in MANUAL_BACKFILL:
-                manual_scores = MANUAL_BACKFILL[driver] 
+            if results_needed > 0 and driver_code in MANUAL_BACKFILL:
+                manual_scores = MANUAL_BACKFILL[driver_code] 
                 real_positions = [r['pos'] for r in real_results]
                 
                 if results_needed == 3: combined = [manual_scores[2], manual_scores[1], manual_scores[0]]
@@ -98,8 +113,11 @@ with tab1:
             surp_target = max(1, round_half_up(raw_surp))
             flop_target = min(DNF_VALUE, round_half_up(raw_flop))
 
+            # Fetch the full name instead of the 3-letter code
+            full_name = driver_names_map.get(driver_code, driver_code)
+
             table_data.append({
-                "Driver": driver,
+                "Driver": full_name,
                 "Last 3": pos_history_str,
                 "W.Avg": round(w_avg, 2),
                 "Raw Surp": round(raw_surp, 2),
@@ -109,12 +127,12 @@ with tab1:
             })
 
         df = pd.DataFrame(table_data).sort_values(by="W.Avg").reset_index(drop=True)
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        # Added height=800 to stretch the table
+        st.dataframe(df, use_container_width=True, hide_index=True, height=800)
         st.caption("* Asterisks indicate historical 2024/F2 data used for backfilling.")
 
 with tab2:
     st.subheader("Season Spaghetti Graph")
-    # We will chart the current season. If it hasn't started, show 2025.
     chart_races = races_2026 if races_2026 else races_2025
     year_label = "2026" if races_2026 else "2025"
     
@@ -127,14 +145,19 @@ with tab2:
             race_name = race['raceName'].replace(" Grand Prix", "")
             for result in race['Results']:
                 code = result['Driver']['code']
+                
+                # Use full names for the graph legend too
+                given = result['Driver']['givenName']
+                family = result['Driver']['familyName']
+                full_name = f"{given} {family}"
+                
                 pos = int(result['positionText']) if result['positionText'].isnumeric() else DNF_VALUE
-                graph_data.append({"Race": race_name, "Driver": code, "Position": pos})
+                graph_data.append({"Race": race_name, "Driver": full_name, "Position": pos})
         
         df_graph = pd.DataFrame(graph_data)
         
-        # Plotly makes the interactive line chart
         fig = px.line(df_graph, x="Race", y="Position", color="Driver", markers=True, template="plotly_dark")
-        fig.update_yaxes(autorange="reversed", tickmode='linear', tick0=1, dtick=1) # P1 at top, P21 at bottom
-        fig.update_layout(height=700, legend_title="Drivers")
+        fig.update_yaxes(autorange="reversed", tickmode='linear', tick0=1, dtick=1) 
+        fig.update_layout(height=800, legend_title="Drivers") # Stretched the graph a bit too to match
         
         st.plotly_chart(fig, use_container_width=True)
