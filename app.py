@@ -152,7 +152,17 @@ with tab1:
 
         df = pd.DataFrame(table_data).sort_values(by="W.Avg").reset_index(drop=True)
         # Dynamic height so every driver row fits without scrolling
-        styled_df = df.style.set_properties(subset=['SURPRISE', 'FLOP'], **{'font-weight': 'bold'})
+        def apply_row_colors(row):
+            color = TEAM_COLORS.get(row['Driver'], '#FFFFFF').lstrip('#')
+            r, g, b = tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
+            return [f'background-color: rgba({r}, {g}, {b}, 0.15)'] * len(row)
+
+        styled_df = (df.style
+            .apply(apply_row_colors, axis=1)
+            .set_properties(subset=['SURPRISE', 'FLOP'], **{'font-weight': 'bold'})
+            .format({'W.Avg': '{:.2f}', 'Raw Surp': '{:.2f}', 'Raw Flop': '{:.2f}'})
+        )
+
         st.dataframe(styled_df, use_container_width=True, hide_index=True, height=(len(df) * 40) + 50)
         st.caption("* Asterisks indicate historical 2024/F2 data used for backfilling.")
 
