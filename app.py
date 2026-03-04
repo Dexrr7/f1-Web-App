@@ -127,8 +127,9 @@ with tab1:
             })
 
         df = pd.DataFrame(table_data).sort_values(by="W.Avg").reset_index(drop=True)
-        # Added height=800 to stretch the table
-        st.dataframe(df, use_container_width=True, hide_index=True, height=800)
+        # Dynamic height so every driver row fits without scrolling
+        table_height = (len(df) * 40) + 50
+        st.dataframe(df, use_container_width=True, hide_index=True, height=table_height)
         st.caption("* Asterisks indicate historical 2024/F2 data used for backfilling.")
 
 with tab2:
@@ -158,6 +159,6 @@ with tab2:
         
         fig = px.line(df_graph, x="Race", y="Position", color="Driver", markers=True, template="plotly_dark")
         fig.update_yaxes(autorange="reversed", tickmode='linear', tick0=1, dtick=1) 
-        fig.update_layout(height=800, legend_title="Drivers") # Stretched the graph a bit too to match
+        fig.update_layout(height=1200, legend_title="Drivers")  # Bumped to match the taller table
         
         st.plotly_chart(fig, use_container_width=True)
