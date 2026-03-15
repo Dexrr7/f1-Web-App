@@ -90,13 +90,24 @@ if st.button('🔄 Refresh Live Data'):
 # Fetch Data
 with st.spinner("Fetching latest Jolpica F1 data..."):
     races_2026 = fetch_races_for_year(2026)
-    races_2025 = fetch_races_for_year(2025) if len(races_2026) < 3 else []
-    all_recent_races = (races_2025 + races_2026)[-3:]
+    races_2025 = fetch_races_for_year(2025)
+    all_races = races_2025 + races_2026
 
 tab1, tab2 = st.tabs(["🎯 Flop & Surprise Targets", "📈 Driver Progression Graph"])
 
 with tab1:
-    st.subheader("Last 3 Races Analysis")
+    # Create dropdown options formatted as '2026 Chinese Grand Prix'
+    race_options = [f"{r['season']} {r['raceName']}" for r in all_races]
+    
+    # Dropdown defaults to the most recent race (the last one in the list)
+    selected_race_str = st.selectbox("⏳ Time Machine: Select End Race", reversed(race_options))
+    
+    # Find the index of the selected race and slice the last 3
+    selected_index = race_options.index(selected_race_str)
+    start_index = max(0, selected_index - 2)
+    all_recent_races = all_races[start_index : selected_index + 1]
+
+    st.subheader("Historical 3-Race Analysis")
     if not all_recent_races:
         st.error("API Error: Could not fetch data.")
     else:
