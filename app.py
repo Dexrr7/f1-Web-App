@@ -54,7 +54,7 @@ def round_half_up(n):
 @st.cache_data(ttl=3600)
 def fetch_races_for_year(year):
     try:
-        url = f"{BASE_URL}/{year}/results.json?limit=100"
+        url = f"{BASE_URL}/{year}/results.json?limit=1000"
         resp = requests.get(url, timeout=5).json()
         return resp['MRData']['RaceTable']['Races']
     except:
@@ -148,9 +148,11 @@ with tab1:
         df = pd.DataFrame(table_data).sort_values(by="W.Avg").reset_index(drop=True)
         # Dynamic height so every driver row fits without scrolling
         def apply_row_colors(row):
-            color = TEAM_COLORS.get(row['Driver'], '#FFFFFF').lstrip('#')
+            driver = row['Driver']
+            color = TEAM_COLORS.get(driver, '#FFFFFF').lstrip('#')
             r, g, b = tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
-            return [f'background-color: rgba({r}, {g}, {b}, 0.15)'] * len(row)
+            opacity = 0.45 if driver in ['Oscar Piastri', 'Lando Norris'] else 0.15
+            return [f'background-color: rgba({r}, {g}, {b}, {opacity})'] * len(row)
 
         styled_df = (df.style
             .apply(apply_row_colors, axis=1)
