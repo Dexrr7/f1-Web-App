@@ -111,6 +111,17 @@ with tab1:
     if not all_recent_races:
         st.error("API Error: Could not fetch data.")
     else:
+        has_next_race = (selected_index + 1) < len(all_races)
+        actual_results = {}
+        if has_next_race:
+            next_race = all_races[selected_index + 1]
+            st.write(f"**Target Race for Verdict:** {next_race['season']} {next_race['raceName']}")
+            for result in next_race['Results']:
+                if result['Driver']['code'] not in EXCLUDED_DRIVERS:
+                    actual_results[result['Driver']['code']] = int(result['positionText']) if result['positionText'].isnumeric() else DNF_VALUE
+        else:
+            st.write("**Target Race for Verdict:** Pending Details ⏳")
+
         st.write(f"**Analyzing:** {' ➔ '.join([r['raceName'] for r in all_recent_races])}")
         
         base_weights = [1, 2, 3][-len(all_recent_races):]
@@ -165,6 +176,21 @@ with tab1:
             # Fetch the full name instead of the 3-letter code
             full_name = driver_names_map.get(driver_code, driver_code)
 
+            actual_pos_str = "TBD"
+            verdict_str = "Pending ⏳"
+
+            if has_next_race:
+                if driver_code in actual_results:
+                    actual_pos = actual_results[driver_code]
+                    actual_pos_str = str(actual_pos)
+                    
+                    if actual_pos <= surp_target:
+                        verdict_str = "Surprise 🟢"
+                    elif actual_pos >= flop_target:
+                        verdict_str = "Flop 🔴"
+                    else:
+                        verdict_str = "Expected ⚪"
+
             table_data.append({
                 "Driver": full_name,
                 "Last 3": pos_history_str,
@@ -172,7 +198,9 @@ with tab1:
                 "Raw Surp": round(raw_surp, 2),
                 "SURPRISE": f"P{surp_target} or ^",
                 "Raw Flop": round(raw_flop, 2),
-                "FLOP": f"P{flop_target} or v"
+                "FLOP": f"P{flop_target} or v",
+                "Actual Pos": actual_pos_str,
+                "Verdict": verdict_str
             })
 
         df = pd.DataFrame(table_data).sort_values(by="W.Avg").reset_index(drop=True)
@@ -186,7 +214,7 @@ with tab1:
 
         styled_df = (df.style
             .apply(apply_row_colors, axis=1)
-            .set_properties(subset=['SURPRISE', 'FLOP'], **{'font-weight': 'bold'})
+            .set_properties(subset=['SURPRISE', 'FLOP', 'Verdict'], **{'font-weight': 'bold'})
             .format({'W.Avg': '{:.2f}', 'Raw Surp': '{:.2f}', 'Raw Flop': '{:.2f}'})
         )
 
