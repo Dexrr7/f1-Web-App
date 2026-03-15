@@ -53,12 +53,31 @@ def round_half_up(n):
 
 @st.cache_data(ttl=3600)
 def fetch_races_for_year(year):
-    try:
-        url = f"{BASE_URL}/{year}/results.json?limit=1000"
-        resp = requests.get(url, timeout=5).json()
-        return resp['MRData']['RaceTable']['Races']
-    except:
-        return []
+    all_races_dict = {}
+    offset = 0
+    while True:
+        try:
+            url = f"{BASE_URL}/{year}/results.json?limit=100&offset={offset}"
+            resp = requests.get(url, timeout=5).json()
+            races = resp['MRData']['RaceTable']['Races']
+            if not races:
+                break
+            
+            for race in races:
+                rnd = race['round']
+                if rnd not in all_races_dict:
+                    all_races_dict[rnd] = race
+                else:
+                    all_races_dict[rnd]['Results'].extend(race['Results'])
+            
+            total = int(resp['MRData']['total'])
+            offset += 100
+            if offset >= total:
+                break
+        except:
+            break
+            
+    return list(all_races_dict.values())
 
 # --- APP LAYOUT ---
 st.title("🏎️ F1 Driver Dashboard")
