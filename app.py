@@ -5,13 +5,13 @@ import plotly.express as px
 
 # --- SETTINGS ---
 st.set_page_config(page_title="F1 Flop & Surprise Tracker", layout="wide", page_icon="🏎️")
-DNF_VALUE = 21
+DNF_VALUE = 23
 BASE_URL = "http://api.jolpi.ca/ergast/f1" 
 
 MANUAL_BACKFILL = {
     'LIN': [9, 4, 6],    
-    'PER': [21, 21, 10], 
-    'BOT': [21, 11, 18]  
+    'PER': [23, 23, 10], 
+    'BOT': [23, 11, 18]  
 }
 
 EXCLUDED_DRIVERS = ['TSU', 'MAG', 'ZHO']
