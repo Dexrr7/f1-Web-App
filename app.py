@@ -98,6 +98,10 @@ tab1, tab2 = st.tabs(["🎯 Flop & Surprise Targets", "📈 Driver Progression G
 with tab1:
     # Create dropdown options formatted as '2026 Chinese Grand Prix'
     race_options = [f"{r['season']} {r['raceName']}" for r in all_races]
+
+    if not race_options:
+        st.error("⚠️ The F1 API is temporarily down or timed out. Please try refreshing in a few minutes.")
+        st.stop()
     
     # Dropdown defaults to the most recent race (the last one in the list)
     selected_race_str = st.selectbox("⏳ Time Machine: Select End Race", reversed(race_options))
