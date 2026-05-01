@@ -58,7 +58,7 @@ def fetch_races_for_year(year):
     while True:
         try:
             url = f"{BASE_URL}/{year}/results.json?limit=100&offset={offset}"
-            resp = requests.get(url, timeout=5).json()
+            resp = requests.get(url, timeout=15, headers={'User-Agent': 'F1Dashboard/1.0'}).json()
             races = resp['MRData']['RaceTable']['Races']
             if not races:
                 break
@@ -74,7 +74,8 @@ def fetch_races_for_year(year):
             offset += 100
             if offset >= total:
                 break
-        except:
+        except Exception as e:
+            print(f"API Error for {year} at offset {offset}: {e}")
             break
             
     return list(all_races_dict.values())
