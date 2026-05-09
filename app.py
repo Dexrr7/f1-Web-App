@@ -75,7 +75,7 @@ def fetch_races_for_year(year):
             if offset >= total:
                 break
         except Exception as e:
-            print(f"API Error for {year} at offset {offset}: {e}")
+            st.error(f"🚨 API Error for {year} at offset {offset}: {e}")
             break
             
     return list(all_races_dict.values())
