@@ -6,7 +6,7 @@ import plotly.express as px
 # --- SETTINGS ---
 st.set_page_config(page_title="F1 Flop & Surprise Tracker", layout="wide", page_icon="🏎️")
 DNF_VALUE = 23
-BASE_URL = "http://api.jolpi.ca/ergast/f1" 
+BASE_URL = "https://api.jolpi.ca/ergast/f1" 
 
 MANUAL_BACKFILL = {
     'LIN': [9, 4, 6],    
